@@ -5,12 +5,13 @@
 #include "shellmemory.h"
 #include "shell.h"
 
-int MAX_ARGS_SIZE = 3;
+int MAX_ARGS_SIZE = 7;
 
 int help();
 int quit();
 int badcommand();
-int set(char* var, char* value);
+int printError(char* error);
+int set(char* var, char* values[], int n);
 int print(char* var);
 int run(char* script);
 int badcommandFileDoesNotExist();
@@ -19,8 +20,10 @@ int badcommandFileDoesNotExist();
 int interpreter(char* command_args[], int args_size){
 	int i;
 
-	if ( args_size < 1 || args_size > MAX_ARGS_SIZE){
+	if ( args_size < 1 ){
 		return badcommand();
+	} else if(args_size > MAX_ARGS_SIZE){
+		return printError("Too many tokens.\r\n");
 	}
 
 
@@ -40,8 +43,11 @@ int interpreter(char* command_args[], int args_size){
 
 	} else if (strcmp(command_args[0], "set")==0) {
 		//set
-		if (args_size != 3) return badcommand();	
-		return set(command_args[1], command_args[2]);
+		if (args_size < 3) return badcommand();
+		if (args_size > 7) return printError("Too many tokens.");
+		char *values[args_size - 2];
+		for (int i = 2, j = 0; i < args_size; i++, j++) values[j] = command_args[i];
+		return set(command_args[1], values, args_size - 2);
 	
 	} else if (strcmp(command_args[0], "print")==0) {
 		if (args_size != 2) return badcommand();
@@ -76,21 +82,30 @@ int badcommand(){
 	return 1;
 }
 
+int printError(char* error){
+	printf("Bad command: %s", error);
+	return 1;
+}
+
 // For run command only
 int badcommandFileDoesNotExist(){
 	printf("%s\n", "Bad command: File not found");
 	return 3;
 }
 
-int set(char* var, char* value){
+int set(char* var, char* values[], int n){
 
 	char *link = "=";
-	char buffer[1000];
-	strcpy(buffer, var);
-	strcat(buffer, link);
-	strcat(buffer, value);
+	char buffer[1000] = "";
+	//strcpy(buffer, var);
+	//strcat(buffer, link);
+	for(int i = 0; i < n - 1; i++){
+		strcat(buffer, values[i]);
+		strcat(buffer, " ");
+	}
+	strcat(buffer, values[n - 1]);
 
-	mem_set_value(var, value);
+	mem_set_value(var, buffer);
 
 	return 0;
 
