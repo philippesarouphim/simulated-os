@@ -15,6 +15,7 @@ int set(char* var, char* values[], int n);
 int print(char* var);
 int run(char* script);
 int echo(char* value);
+int my_ls();
 int badcommandFileDoesNotExist();
 
 // Interpret commands and their arguments
@@ -62,6 +63,10 @@ int interpreter(char* command_args[], int args_size){
 		if (args_size != 2) return badcommand();
 		return echo(command_args[1]);
 
+	} else if(strcmp(command_args[0], "my_ls") == 0){
+		if (args_size != 1) return badcommand();
+		return my_ls();
+
 	} else return badcommand();
 }
 
@@ -72,7 +77,7 @@ help			Displays all the commands\n \
 quit			Exits / terminates the shell with “Bye!”\n \
 set VAR STRING		Assigns a value to shell memory\n \
 print VAR		Displays the STRING assigned to VAR\n \
-run SCRIPT.TXT		Executes the file SCRIPT.TXT\n ";
+run SCRIPT.TXT		Executes the file SCRIPT.TXT\n";
 	printf("%s\n", help_string);
 	return 0;
 }
@@ -152,4 +157,9 @@ int echo(char* value){
 		printf("%s\r\n", strcmp(val, "Variable does not exist") == 0 ? "" : val);
 	}
 	else printf("%s\r\n", value);
+}
+
+int my_ls(){
+	system("ls -1");
+	return 0;
 }
