@@ -51,24 +51,36 @@ int main(int argc, char *argv[]) {
 int parseInput(char ui[]) {
  
 	char tmp[200];
-	char *words[100];							
-	int a,b;							
-	int w=0; // wordID
+	char *words[10][100];							
+	int a=0,b;							
+	int v=0;
+	int w[10];
 
-	for(a=0; ui[a]==' ' && a<1000; a++);		// skip white spaces
+	while(ui[a] != '\0' && a<1000){
+		w[v] = 0;
 
-	while(ui[a] != '\0' && a<1000) {
+		for(a = a; ui[a]==' ' && a<1000; a++);		// skip white spaces
 
-		for(b=0; ui[a]!='\0' && ui[a]!=' ' && a<1000; a++, b++)
-			tmp[b] = ui[a];						// extract a word
-	 
-		tmp[b] = '\0';
+		while(ui[a] != ';' && ui[a] != '\0' && a<1000) {
 
-		words[w] = strdup(tmp);
+			for(b=0; ui[a]!=';' && ui[a]!='\0' && ui[a]!=' ' && a<1000; a++, b++)
+				tmp[b] = ui[a];						// extract a word
+		
+			tmp[b] = '\0';
 
-		a++; 
-		w++;
+			words[v][w[v]] = strdup(tmp);
+
+			if(ui[a] != ';') a++; 
+			w[v]++;
+		}
+
+		a++;
+		v++;
 	}
 
-	return interpreter(words, w);
+	for(int i = 0; i < v; i++){
+		int code = interpreter(words[i], w[i]);
+	}
+
+	return 0;
 }
