@@ -44,11 +44,17 @@ int interpreter(char* command_args[], int args_size){
 		return quit();
 
 	} else if (strcmp(command_args[0], "set")==0) {
-		//set
+		// set
+
+		// Check if we have between 3 to 7 arguments
 		if (args_size < 3) return badcommand();
 		if (args_size > 7) return printError("Too many tokens.");
+
+		// Extract the words to be set to the variable
 		char *values[args_size - 2];
 		for (int i = 2, j = 0; i < args_size; i++, j++) values[j] = command_args[i];
+
+		// Perform set and return
 		return set(command_args[1], values, args_size - 2);
 	
 	} else if (strcmp(command_args[0], "print")==0) {
@@ -60,11 +66,21 @@ int interpreter(char* command_args[], int args_size){
 		return run(command_args[1]);
 	
 	} else if(strcmp(command_args[0], "echo") == 0){
+		// echo
+
+		// Check if there are exactly 2 arguments
 		if (args_size != 2) return badcommand();
+
+		// Echo and return
 		return echo(command_args[1]);
 
 	} else if(strcmp(command_args[0], "my_ls") == 0){
+		// my_ls
+
+		// Check if there is only 1 args
 		if (args_size != 1) return badcommand();
+
+		// Perform ls and return
 		return my_ls();
 
 	} else return badcommand();
@@ -92,9 +108,10 @@ int badcommand(){
 	return 1;
 }
 
+// Print the given error string and return code -1
 int printError(char* error){
 	printf("Bad command: %s", error);
-	return 1;
+	return -1;
 }
 
 // For run command only
@@ -107,8 +124,6 @@ int set(char* var, char* values[], int n){
 
 	char *link = "=";
 	char buffer[1000] = "";
-	//strcpy(buffer, var);
-	//strcat(buffer, link);
 	for(int i = 0; i < n - 1; i++){
 		strcat(buffer, values[i]);
 		strcat(buffer, " ");
@@ -151,15 +166,22 @@ int run(char* script){
 	return errCode;
 }
 
+// Prints value to the console.
+// Or if preceded by $, print the variable if it exists.
 int echo(char* value){
+	// Check if the value is prefixed with '$'
 	if(value[0] == '$'){
+		// Get variable from memory and print
 		char* val = mem_get_value(value + sizeof(char));
 		printf("%s\r\n", strcmp(val, "Variable does not exist") == 0 ? "" : val);
 	}
+	// Print the text as is
 	else printf("%s\r\n", value);
 }
 
+// List all of the files present in the current directory
 int my_ls(){
+	// Run the ls -1 command which lists each of the files in the current directory on a seperate line.
 	system("ls -1");
 	return 0;
 }

@@ -31,6 +31,8 @@ int main(int argc, char *argv[]) {
 		printf("%c ",prompt);
 		fgets(userInput, MAX_USER_INPUT-1, stdin);
 
+		// If end of file is reached (only happens in batch),
+		// then, switch the input from batch to command line.
 		if(feof(stdin)){
 			freopen("/dev/tty", "r", stdin);
 		}
@@ -53,16 +55,19 @@ int parseInput(char ui[]) {
 	int v=0;
 	int w[10];
 
+	// Parse all commands
 	while(ui[a] != '\0' && a<1000){
 		w[v] = 0;
 
-		for(a = a; ui[a]==' ' && a<1000; a++);		// skip white spaces
+		// Skip white spaces
+		for(a = a; ui[a]==' ' && a<1000; a++);
 
+		// Extracts all words from a single command
 		while(ui[a] != ';' && ui[a] != '\0' && a<1000) {
 
+			// Extract a word
 			for(b=0; ui[a]!=';' && ui[a]!='\0' && ui[a]!=' ' && a<1000; a++, b++)
-				tmp[b] = ui[a];						// extract a word
-		
+				tmp[b] = ui[a];
 			tmp[b] = '\0';
 
 			words[v][w[v]] = strdup(tmp);
@@ -75,6 +80,7 @@ int parseInput(char ui[]) {
 		v++;
 	}
 
+	// Execute all commands
 	for(int i = 0; i < v; i++){
 		int code = interpreter(words[i], w[i]);
 	}
