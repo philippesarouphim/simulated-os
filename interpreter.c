@@ -4,6 +4,8 @@
 
 #include "shellmemory.h"
 #include "shell.h"
+#include "pcb.c"
+#include "queue.c"
 
 int MAX_ARGS_SIZE = 7;
 
@@ -141,29 +143,15 @@ int print(char* var){
 	return 0;
 }
 
+// Saves input code in memory, then runs it.
 int run(char* script){
-	int errCode = 0;
-	char line[1000];
-	FILE *p = fopen(script,"rt");  // the program is in a file
+	// Create queue, and enqueue the only process
+	struct Queue* queue = create_queue();
+	queue->enqueue(queue, create_pcb(script));
 
-	if(p == NULL){
-		return badcommandFileDoesNotExist();
-	}
-
-	fgets(line,999,p);
-	while(1){
-		errCode = parseInput(line);	// which calls interpreter()
-		memset(line, 0, sizeof(line));
-
-		if(feof(p)){
-			break;
-		}
-		fgets(line,999,p);
-	}
-
-    fclose(p);
-
-	return errCode;
+	// Dequeue the only process and execute it until end
+	struct pcb* block = queue->dequeue(queue);
+	block->execute_until_end(block);
 }
 
 // Prints value to the console.
