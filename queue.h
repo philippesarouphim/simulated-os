@@ -1,0 +1,1 @@
+struct Queue* create_queue();
