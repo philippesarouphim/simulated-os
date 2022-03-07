@@ -16,8 +16,11 @@ struct pcb{
     int pid;
     char* mem_prefix;
     int length;
+    int score;
     int counter;
+
     int (*execute_next) (struct pcb* this);
+    int (*execute_next_n) (struct pcb* this, int num);
     void (*execute_until_end) (struct pcb* this);
     void (*free_memory) (struct pcb* this);
 };
@@ -56,6 +59,22 @@ int execute_next(struct pcb* this){
     return 1;
 }
 
+// This method executes a determined number of lines of code.
+// If it executes the last line of code, it cleares the process' code from memory.
+// Returns 0 if end of code is reached, 1 otherwise.
+int execute_next_n(struct pcb* this, int num){
+    // Execute determined number of lines of code.
+    for(int i = 0; i < num; i++){
+        // Check whether end is reached, in which case return 0.
+        if(!execute_next(this)){
+            return 0;
+        }
+    }
+
+    // Execution terminated without reaching end of code, return 1.
+    return 1;
+}
+
 // This method executes all lines of code in the process.
 // On finish, it cleares the process' code from memory.
 void execute_until_end(struct pcb* this){
@@ -71,8 +90,10 @@ struct pcb* create_pcb(char* code_file){
     block->mem_prefix = malloc(sizeof(char) * 16);
     sprintf(block->mem_prefix, "process|%d|", block->pid);
     block->length = 0;
+    block->score = 0;
     block-> counter = 0;
     block->execute_next = execute_next;
+    block->execute_next_n = execute_next_n;
     block->execute_until_end = execute_until_end;
     block->free_memory = free_memory;
 
@@ -97,6 +118,7 @@ void load_code_into_pcb(struct pcb* block, char* code_file){
 		mem_set_value(line_key, line);
 
         block->length++;
+        block->score++;
 
         // Check if end of file is reached
 		if(feof(code)){
@@ -115,7 +137,7 @@ int generate_pid(){
     char* current_pid = mem_get_value(pid_counter);
 
     // If counter does not exist, create it, set its value to 0, and return id 0.
-    if(!current_pid){
+    if(strcmp(pid_counter, "Variable does not exist") == 0){
         current_pid = "0";
         mem_set_value(pid_counter, current_pid);
         return 0;
@@ -124,7 +146,7 @@ int generate_pid(){
     // Generate new PID by incrementing current one by 1, save, and return
     int new_pid = atoi(current_pid) + 1;
     char* new_pid_s = malloc(8 * sizeof(char));
-    sprintf(new_pid_s, "%d", 42);
+    sprintf(new_pid_s, "%d", new_pid);
     mem_set_value(pid_counter, new_pid_s);
     return new_pid;
 }
