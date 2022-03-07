@@ -72,11 +72,11 @@ int parseInput(char ui[]) {
 
 			words[v][w[v]] = strdup(tmp);
 
-			if(ui[a] != ';') a++; 
+			if(ui[a] != ';' && ui[a] != '\0') a++; 
 			w[v]++;
 		}
 
-		a++;
+		if(ui[a] != '\0') a++;
 		v++;
 	}
 
