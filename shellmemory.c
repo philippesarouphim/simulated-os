@@ -44,6 +44,18 @@ void mem_init(){
 	}
 }
 
+// This method frees up memory where the data with specified key was stored.
+void mem_reset(char* key){
+	// Iterate through each key-value pair in memory to find the requested key
+	for (int i = 0; i < 1000; i++){
+		if (strcmp(shellmemory[i].var, key) == 0){
+			// Set default values for key and value.
+			shellmemory[i].var = "none";
+			shellmemory[i].value = "none";
+		} 
+	}
+}
+
 // Set key value pair
 void mem_set_value(char *var_in, char *value_in) {
 	
@@ -75,7 +87,6 @@ char *mem_get_value(char *var_in) {
 
 	for (i=0; i<1000; i++){
 		if (strcmp(shellmemory[i].var, var_in) == 0){
-
 			return strdup(shellmemory[i].value);
 		} 
 	}
