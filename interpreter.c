@@ -4,7 +4,7 @@
 
 #include "shellmemory.h"
 #include "shell.h"
-#include "pcb.c"
+//#include "pcb.c"
 #include "queue.c"
 
 int MAX_ARGS_SIZE = 7;
@@ -18,6 +18,7 @@ int print(char* var);
 int run(char* script);
 int echo(char* value);
 int my_ls();
+int exec_conc();
 int badcommandFileDoesNotExist();
 
 // Interpret commands and their arguments
@@ -85,6 +86,15 @@ int interpreter(char* command_args[], int args_size){
 		// Perform ls and return
 		return my_ls();
 
+	} else if(strcmp(command_args[0], "exec") == 0){
+		// exec
+
+		// Check if args between 2 and 5
+		if(args_size < 2 || args_size > 5) return badcommand();
+
+		// Make the call for concurrent execution of processes.
+		return exec_conc(command_args, args_size);
+
 	} else return badcommand();
 }
 
@@ -146,12 +156,11 @@ int print(char* var){
 // Saves input code in memory, then runs it.
 int run(char* script){
 	// Create queue, and enqueue the only process
-	struct Queue* queue = create_queue();
+	struct Queue* queue = create_queue(FCFS);
 	queue->enqueue(queue, create_pcb(script));
 
-	// Dequeue the only process and execute it until end
-	struct pcb* block = queue->dequeue(queue);
-	block->execute_until_end(block);
+	// Execute the process in the queue and free memory.
+	queue->execute(queue);
 }
 
 // Prints value to the console.
@@ -172,4 +181,58 @@ int my_ls(){
 	// Run the ls -1 command which lists each of the files in the current directory on a seperate line.
 	system("ls -1");
 	return 0;
+}
+
+// This method performs the consurrent execution of the processes based on the given scheduling policy.
+int exec_conc(char* args[], int args_size){
+	// Ensure no two file names are the same.
+	if(args_size >= 4 && strcmp(args[1], args[2]) == 0){
+		printf("File names must be different.\n");
+		return -1;
+	}
+	if(args_size == 5 && (strcmp(args[1], args[3]) == 0 || strcmp(args[2], args[3]) == 0)){
+		printf("File names must be different.\n");
+		return -1;
+	}
+
+	// Retrieve and parse policy from args
+	enum Policy policy;
+	if(args_size == 2) policy = FCFS;
+	else policy = string_to_policy(args[args_size - 1]);
+	if(policy == INVALID){
+		printf("Policy invalid\n");
+		return -1;
+	}
+
+	// Create PCBs and for each one, check if we ran out of memory and handle error.
+	struct pcb* block1 = create_pcb(args[1]);
+	if(!block1){
+		printf("Ran out of memory.\n");
+		return -1;
+	}
+	struct pcb* block2;
+	if(args_size >= 4){
+		block2 = create_pcb(args[2]);
+		if(!block2){
+			printf("Ran out of memory.\n");
+			return -1;
+		}
+	}
+	struct pcb* block3;
+	if(args_size == 5){
+		block3 = create_pcb(args[3]);
+		if(!block3){
+			printf("Ran out of memory.\n");
+			return -1;
+		}
+	}
+
+	// Create ready queue and enqueue processes.
+	struct Queue* queue = create_queue(policy);
+	queue->enqueue(queue, block1);
+	if(block2) queue->enqueue(queue, block2);
+	if(block3) queue->enqueue(queue, block3);
+
+	// Execute processes in the queue.
+	queue->execute(queue);
 }
