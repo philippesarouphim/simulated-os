@@ -8,7 +8,7 @@
 
 int generate_pid();
 struct pcb* create_pcb(char* code_file);
-void load_code_into_pcb(struct pcb* block, char* code_file);
+int load_code_into_pcb(struct pcb* block, char* code_file);
 
 char* pid_counter = "pid_counter";
 
@@ -83,6 +83,7 @@ void execute_until_end(struct pcb* this){
 
 // This is a constructor for the PCB struct.
 // It generates the PCB with all default values, a unique PID, then loads the input code in memory.
+// If ran out of memory while loading code, returns null.
 struct pcb* create_pcb(char* code_file){
     struct pcb* block = malloc(sizeof(struct pcb));
 
@@ -97,14 +98,18 @@ struct pcb* create_pcb(char* code_file){
     block->execute_until_end = execute_until_end;
     block->free_memory = free_memory;
 
-    load_code_into_pcb(block, code_file);
+    if(load_code_into_pcb(block, code_file)) return block;
 
-    return block;
+    // If memory ran out of space, free memory and return null.
+    block->free_memory(block);
+    free(block);
+    return NULL;
 }
 
 // This method loads code of a PCB into memory.
 // It also sets the length of code to the appropriate value.
-void load_code_into_pcb(struct pcb* block, char* code_file){
+// If memory ran out of space, returns 0, 1 otherwise.
+int load_code_into_pcb(struct pcb* block, char* code_file){
     FILE* code = fopen(code_file, "rt");
 
     char line[1000];
@@ -115,7 +120,11 @@ void load_code_into_pcb(struct pcb* block, char* code_file){
 		// Save the line of code
         char* line_key = malloc(sizeof(char) * 24);
         sprintf(line_key, "%s%d", block->mem_prefix, block->length);
-		mem_set_value(line_key, line);
+		if(!mem_set_value(line_key, line)){
+            // Close file and return 0 if ran out of space
+            fclose(code);
+            return 0;
+        }
 
         block->length++;
         block->score++;
@@ -129,6 +138,8 @@ void load_code_into_pcb(struct pcb* block, char* code_file){
 	}
 
     fclose(code);
+
+    return 1;
 }
 
 // This method generates a new unique PID.
