@@ -56,15 +56,16 @@ void mem_reset(char* key){
 	}
 }
 
-// Set key value pair
-void mem_set_value(char *var_in, char *value_in) {
+// Set key value pair.
+// Returns 1 if saving was successful, 0 otherwise.
+int mem_set_value(char *var_in, char *value_in) {
 	
 	int i;
 
 	for (i=0; i<1000; i++){
 		if (strcmp(shellmemory[i].var, var_in) == 0){
 			shellmemory[i].value = strdup(value_in);
-			return;
+			return 1;
 		} 
 	}
 
@@ -73,11 +74,11 @@ void mem_set_value(char *var_in, char *value_in) {
 		if (strcmp(shellmemory[i].var, "none") == 0){
 			shellmemory[i].var = strdup(var_in);
 			shellmemory[i].value = strdup(value_in);
-			return;
+			return 1;
 		} 
 	}
 
-	return;
+	return 0;
 
 }
 
