@@ -43,7 +43,7 @@ My code form assignment 1 is based on the starter code for assignment 1.
     - Each time we call `generate_pid()`, this pair will be retrieved from memory, the value will be incremented by 1, and then saved back to memory.
     - This newly incremented value is returned from the function.
 
-2. Storing of code in memory:
+2. Code storage in memory:
     - Each line of code is stored as a key-value pair in the shell memory.
     - The key has the following format: `process|{pid}|{#line}`.
     - Therefore, if we want to retrieve the 5th line of code of the process with pid 45, we get the value from memory with key `process|45|5`.
