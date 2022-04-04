@@ -27,6 +27,9 @@ int main(int argc, char *argv[]) {
 	//init shell memory
 	mem_init();
 
+	system("test -d backingStore && rm -r ./backingStore");
+	system("mkdir backingStore");
+
 	while(1) {
 		printf("%c ",prompt);
 		fgets(userInput, MAX_USER_INPUT-1, stdin);

@@ -111,6 +111,7 @@ run SCRIPT.TXT		Executes the file SCRIPT.TXT\n";
 }
 
 int quit(){
+	system("rm -r backingStore");
 	printf("%s\n", "Bye!");
 	exit(0);
 }
@@ -157,7 +158,7 @@ int print(char* var){
 int run(char* script){
 	// Create queue, and enqueue the only process
 	struct Queue* queue = create_queue(FCFS);
-	queue->enqueue(queue, create_pcb(script));
+	queue->enqueue(queue, create_pcb(0, script));
 
 	// Execute the process in the queue and free memory.
 	queue->execute(queue);
@@ -183,18 +184,8 @@ int my_ls(){
 	return 0;
 }
 
-// This method performs the consurrent execution of the processes based on the given scheduling policy.
+// This method performs the concurrent execution of the processes based on the given scheduling policy.
 int exec_conc(char* args[], int args_size){
-	// Ensure no two file names are the same.
-	if(args_size >= 4 && strcmp(args[1], args[2]) == 0){
-		printf("File names must be different.\n");
-		return -1;
-	}
-	if(args_size == 5 && (strcmp(args[1], args[3]) == 0 || strcmp(args[2], args[3]) == 0)){
-		printf("File names must be different.\n");
-		return -1;
-	}
-
 	// Retrieve and parse policy from args
 	enum Policy policy;
 	if(args_size == 2) policy = FCFS;
@@ -205,27 +196,13 @@ int exec_conc(char* args[], int args_size){
 	}
 
 	// Create PCBs and for each one, check if we ran out of memory and handle error.
-	struct pcb* block1 = create_pcb(args[1]);
-	if(!block1){
-		printf("Ran out of memory.\n");
-		return -1;
-	}
+	struct pcb* block1 = create_pcb(0, args[1]);
+
 	struct pcb* block2;
-	if(args_size >= 4){
-		block2 = create_pcb(args[2]);
-		if(!block2){
-			printf("Ran out of memory.\n");
-			return -1;
-		}
-	}
+	if(args_size >= 4) block2 = create_pcb(1, args[2]);
+
 	struct pcb* block3;
-	if(args_size == 5){
-		block3 = create_pcb(args[3]);
-		if(!block3){
-			printf("Ran out of memory.\n");
-			return -1;
-		}
-	}
+	if(args_size == 5) block3 = create_pcb(2, args[3]);
 
 	// Create ready queue and enqueue processes.
 	struct Queue* queue = create_queue(policy);
@@ -234,5 +211,5 @@ int exec_conc(char* args[], int args_size){
 	if(block3) queue->enqueue(queue, block3);
 
 	// Execute processes in the queue.
-	queue->execute(queue);
+	//queue->execute(queue);
 }
