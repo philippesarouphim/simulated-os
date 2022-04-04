@@ -95,6 +95,12 @@ int interpreter(char* command_args[], int args_size){
 		// Make the call for concurrent execution of processes.
 		return exec_conc(command_args, args_size);
 
+	} else if(strcmp(command_args[0], "resetmem") == 0){
+		// resetmem
+
+		if(args_size != 1) return badcommand();
+		mem_init();
+
 	} else return badcommand();
 }
 
