@@ -3,18 +3,24 @@
 #include<stdio.h>
 
 
-struct memory_struct{
-	char *var;
+// -------------
+// VARIABLE STORE
+// --------------
+
+#define VARIABLE_STORE_SIZE 20
+
+struct variable_memory_struct{
+	char *key;
 	char *value;
 };
 
-struct memory_struct shellmemory[1000];
+struct variable_memory_struct variableStore[VARIABLE_STORE_SIZE];
 
 // Helper functions
-int match(char *model, char *var) {
-	int i, len=strlen(var), matchCount=0;
+int match(char *model, char *key) {
+	int i, len=strlen(key), matchCount=0;
 	for(i=0;i<len;i++)
-		if (*(model+i) == *(var+i)) matchCount++;
+		if (*(model+i) == *(key+i)) matchCount++;
 	if (matchCount == len)
 		return 1;
 	else
@@ -23,7 +29,7 @@ int match(char *model, char *var) {
 
 char *extract(char *model) {
 	char token='=';    // look for this to find value
-	char value[1000];  // stores the extract value
+	char value[VARIABLE_STORE_SIZE];  // stores the extract value
 	int i,j, len=strlen(model);
 	for(i=0;i<len && *(model+i)!=token;i++); // loop till we get there
 	// extract the value
@@ -38,20 +44,20 @@ char *extract(char *model) {
 void mem_init(){
 
 	int i;
-	for (i=0; i<1000; i++){		
-		shellmemory[i].var = "none";
-		shellmemory[i].value = "none";
+	for (i=0; i<VARIABLE_STORE_SIZE; i++){		
+		variableStore[i].key = "none";
+		variableStore[i].value = "none";
 	}
 }
 
 // This method frees up memory where the data with specified key was stored.
 void mem_reset(char* key){
 	// Iterate through each key-value pair in memory to find the requested key
-	for (int i = 0; i < 1000; i++){
-		if (strcmp(shellmemory[i].var, key) == 0){
+	for (int i = 0; i < VARIABLE_STORE_SIZE; i++){
+		if (strcmp(variableStore[i].key, key) == 0){
 			// Set default values for key and value.
-			shellmemory[i].var = "none";
-			shellmemory[i].value = "none";
+			variableStore[i].key = "none";
+			variableStore[i].value = "none";
 		} 
 	}
 }
@@ -62,18 +68,18 @@ int mem_set_value(char *var_in, char *value_in) {
 	
 	int i;
 
-	for (i=0; i<1000; i++){
-		if (strcmp(shellmemory[i].var, var_in) == 0){
-			shellmemory[i].value = strdup(value_in);
+	for (i=0; i<VARIABLE_STORE_SIZE; i++){
+		if (strcmp(variableStore[i].key, var_in) == 0){
+			variableStore[i].value = strdup(value_in);
 			return 1;
 		} 
 	}
 
 	//Value does not exist, need to find a free spot.
-	for (i=0; i<1000; i++){
-		if (strcmp(shellmemory[i].var, "none") == 0){
-			shellmemory[i].var = strdup(var_in);
-			shellmemory[i].value = strdup(value_in);
+	for (i=0; i<VARIABLE_STORE_SIZE; i++){
+		if (strcmp(variableStore[i].key, "none") == 0){
+			variableStore[i].key = strdup(var_in);
+			variableStore[i].value = strdup(value_in);
 			return 1;
 		} 
 	}
@@ -86,11 +92,62 @@ int mem_set_value(char *var_in, char *value_in) {
 char *mem_get_value(char *var_in) {
 	int i;
 
-	for (i=0; i<1000; i++){
-		if (strcmp(shellmemory[i].var, var_in) == 0){
-			return strdup(shellmemory[i].value);
+	for (i=0; i<VARIABLE_STORE_SIZE; i++){
+		if (strcmp(variableStore[i].key, var_in) == 0){
+			return strdup(variableStore[i].value);
 		} 
 	}
 	return "Variable does not exist";
 
+}
+
+
+// -----------
+// FRAME STORE
+// -----------
+
+#define FRAME_STORE_SIZE 999
+#define FRAME_SIZE 3
+
+struct Frame{
+	int isEmpty;
+	char* lines[FRAME_SIZE];
+	void (*clearFrame) (struct Frame* this);
+	void (*loadFrame) (struct Frame* this, char* lines[]);
+};
+
+// This is a method of Frame which clears the frame.
+void clearFrame(struct Frame* this){
+	for(int i = 0; i < FRAME_SIZE; i++) this->lines[i] = NULL;
+	this->isEmpty = 1;
+}
+
+// This is a method of Frame which loads the frame with the input lines.
+// The input lines must contain exactly 3 elements.
+void loadFrame(struct Frame* this, char* lines[]){
+	for(int i = 0; i < FRAME_SIZE; i++) this->lines[i] = lines[i];
+	this->isEmpty = 0;
+}
+
+struct Frame* frameStore[FRAME_STORE_SIZE / FRAME_SIZE];
+
+// This method initializes the frame store.
+void frameStore_init(){
+	for(int i = 0; i < FRAME_STORE_SIZE / FRAME_SIZE; i++){
+		frameStore[i]->clearFrame = clearFrame;
+		frameStore[i]->loadFrame = loadFrame;
+		frameStore[i]->clearFrame(frameStore[i]);
+	}
+}
+
+// This method loads a page in the first empty frame of the store.
+// The input lines must contain exactly 3 elements.
+int loadInFirstEmptyFrame(char* lines[]){
+	for(int i = 0; i < FRAME_STORE_SIZE / FRAME_SIZE; i++){
+		if(frameStore[i]->isEmpty){
+			frameStore[i]->loadFrame(frameStore[i], lines);
+			return i;
+		}
+	}
+	return -1;
 }
