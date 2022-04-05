@@ -6,7 +6,6 @@
 #include "interpreter.h"
 #include "shellmemory.h"
 
-
 int MAX_USER_INPUT = 1000;
 int parseInput(char ui[]);
 
@@ -30,6 +29,8 @@ int main(int argc, char *argv[]) {
 
 	system("test -d backingStore && rm -r ./backingStore");
 	system("mkdir backingStore");
+
+	printf("Frame Store Size = %d; Variable Store Size = %d\n\n", FRAME_STORE_SIZE, VARIABLE_STORE_SIZE);
 
 	while(1) {
 		printf("%c ",prompt);

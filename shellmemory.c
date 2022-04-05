@@ -2,13 +2,9 @@
 #include<string.h>
 #include<stdio.h>
 
-
 // -------------
 // VARIABLE STORE
 // --------------
-
-#define VARIABLE_STORE_SIZE 20
-
 struct variable_memory_struct{
 	char *key;
 	char *value;
@@ -29,7 +25,7 @@ int match(char *model, char *key) {
 
 char *extract(char *model) {
 	char token='=';    // look for this to find value
-	char value[VARIABLE_STORE_SIZE];  // stores the extract value
+	char value[1000];  // stores the extract value
 	int i,j, len=strlen(model);
 	for(i=0;i<len && *(model+i)!=token;i++); // loop till we get there
 	// extract the value
@@ -106,7 +102,6 @@ char *mem_get_value(char *var_in) {
 // FRAME STORE
 // -----------
 
-#define FRAME_STORE_SIZE 999
 #define FRAME_SIZE 3
 
 struct Frame{
