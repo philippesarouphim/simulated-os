@@ -134,6 +134,7 @@ struct Frame* frameStore[FRAME_STORE_SIZE / FRAME_SIZE];
 // This method initializes the frame store.
 void frameStore_init(){
 	for(int i = 0; i < FRAME_STORE_SIZE / FRAME_SIZE; i++){
+		frameStore[i] = malloc(sizeof(struct Frame));
 		frameStore[i]->clearFrame = clearFrame;
 		frameStore[i]->loadFrame = loadFrame;
 		frameStore[i]->clearFrame(frameStore[i]);
@@ -150,4 +151,16 @@ int loadInFirstEmptyFrame(char* lines[]){
 		}
 	}
 	return -1;
+}
+
+// Get a certain line from a certain frame.s
+char* getFrameLine(int frame, int line){
+	if(line >= 3 || line < 0 || frame < 0 || frame >= FRAME_STORE_SIZE / FRAME_SIZE) return NULL;
+	return frameStore[frame]->lines[line];
+}
+
+// Delete a certain frame.
+void deleteFrame(int frame){
+	if(frame < 0 || frame >= FRAME_STORE_SIZE / FRAME_SIZE) return;
+	frameStore[frame]->clearFrame(frameStore[frame]);
 }

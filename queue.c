@@ -21,6 +21,7 @@ struct Queue{
     void (*enqueue) (struct Queue* this, struct pcb* block);
     struct pcb* (*dequeue) (struct Queue* this);
     void (*execute) (struct Queue* this);
+    void (*load_pages) (struct Queue* this);
 };
 
 struct QueueNode{
@@ -58,7 +59,7 @@ void enqueue_shortest(struct Queue* this, struct pcb* block){
         return;
     }
     struct QueueNode* curr = this->head;
-    while(curr->next && curr->next->block->length <= block->length);
+    while(curr->next && curr->next->block->pageCounter <= block->pageCounter);
     struct QueueNode* next = curr->next;
     curr->next = newNode;
     newNode->next = next;
@@ -137,6 +138,15 @@ void aging(struct Queue* this){
     }
 }
 
+// This method performs the initial loading of pages into memory.
+void load_pages(struct Queue* this){
+    struct QueueNode* curr = this->head;
+    while(curr != NULL){
+        curr->block->load_all_pages_into_memory(curr->block);
+        curr = curr->next;
+    }
+}
+
 // This method creates a queue.
 struct Queue* create_queue(enum Policy policy){
     struct Queue* queue = malloc(sizeof(struct Queue));
@@ -157,6 +167,8 @@ struct Queue* create_queue(enum Policy policy){
         queue->execute = rr;
     if(policy == AGING)
         queue->execute = aging;
+
+    queue->load_pages = load_pages;
 
     return queue;
 }

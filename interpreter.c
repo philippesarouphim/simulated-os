@@ -216,6 +216,7 @@ int exec_conc(char* args[], int args_size){
 	if(block2) queue->enqueue(queue, block2);
 	if(block3) queue->enqueue(queue, block3);
 
+	queue->load_pages(queue);
 	// Execute processes in the queue.
-	//queue->execute(queue);
+	queue->execute(queue);
 }
