@@ -142,7 +142,7 @@ void aging(struct Queue* this){
 void load_pages(struct Queue* this){
     struct QueueNode* curr = this->head;
     while(curr != NULL){
-        curr->block->load_all_pages_into_memory(curr->block);
+        curr->block->load_next_n_pages_into_memory(curr->block, 2);
         curr = curr->next;
     }
 }

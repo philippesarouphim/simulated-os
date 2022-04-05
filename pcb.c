@@ -25,6 +25,7 @@ struct pcb{
 
     int (*load_next_page_into_memory) (struct pcb* this);
     void (*load_all_pages_into_memory) (struct pcb* this);
+    void (*load_next_n_pages_into_memory) (struct pcb* this, int n);
     int (*execute_next) (struct pcb* this);
     int (*execute_next_n) (struct pcb* this, int num);
     void (*execute_until_end) (struct pcb* this);
@@ -119,6 +120,13 @@ int load_next_page_into_memory(struct pcb* this){
     return code;
 }
 
+void load_next_n_pages_into_memory(struct pcb* this, int n){
+    for(int i = 0; i < n; i++){
+        int code = this->load_next_page_into_memory(this);
+        if(code != 1) return;
+    }
+}
+
 // This method loads all remainaing pages into the frame store.
 void load_all_pages_into_memory(struct pcb* this){
     while(load_next_page_into_memory(this));
@@ -142,6 +150,7 @@ struct pcb* create_pcb(int i, char* code_file){
 
     block->load_next_page_into_memory = load_next_page_into_memory;
     block->load_all_pages_into_memory = load_all_pages_into_memory;
+    block->load_next_n_pages_into_memory = load_next_n_pages_into_memory;
     block->execute_next = execute_next;
     block->execute_next_n = execute_next_n;
     block->execute_until_end = execute_until_end;

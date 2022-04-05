@@ -166,7 +166,8 @@ int run(char* script){
 	struct Queue* queue = create_queue(FCFS);
 	queue->enqueue(queue, create_pcb(0, script));
 
-	// Execute the process in the queue and free memory.
+	// Load first two pages and execute processes in the queue.
+	queue->load_pages(queue);
 	queue->execute(queue);
 }
 
@@ -216,7 +217,7 @@ int exec_conc(char* args[], int args_size){
 	if(block2) queue->enqueue(queue, block2);
 	if(block3) queue->enqueue(queue, block3);
 
+	// Load first two pages and execute processes in the queue.
 	queue->load_pages(queue);
-	// Execute processes in the queue.
 	queue->execute(queue);
 }
