@@ -2,6 +2,8 @@
 #include<string.h>
 #include<stdio.h>
 
+#include "macros.h"
+
 // -------------
 // VARIABLE STORE
 // --------------
@@ -101,8 +103,6 @@ char *mem_get_value(char *var_in) {
 // -----------
 // FRAME STORE
 // -----------
-
-#define FRAME_SIZE 3
 
 struct Frame{
 	int isEmpty;

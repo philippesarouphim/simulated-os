@@ -6,6 +6,8 @@
 #include "interpreter.h"
 #include "shellmemory.h"
 
+#include "macros.h"
+
 int MAX_USER_INPUT = 1000;
 int parseInput(char ui[]);
 
