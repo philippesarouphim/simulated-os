@@ -18,6 +18,10 @@ void loadFrame(struct Frame* this, char* lines[]){
 	this->isEmpty = 0;
 }
 
+void alertVictim(struct Frame* this){
+	printf("Page fault! Victim page contents:\n%s%s%sEnd of victim page contents.\n", this->lines[0], this->lines[1], this->lines[2]);
+}
+
 struct Frame* frameStore[FRAME_STORE_SIZE / FRAME_SIZE];
 
 // This method initializes the frame store.
@@ -27,6 +31,7 @@ void frameStore_init(){
 		frameStore[i]->clearFrame = clearFrame;
 		frameStore[i]->loadFrame = loadFrame;
 		frameStore[i]->clearFrame(frameStore[i]);
+		frameStore[i]->alertVictim = alertVictim;
 	}
 }
 
@@ -36,27 +41,3 @@ struct Frame* findFirstEmptyFrame(){
 	}
 	return NULL;
 }
-
-// This method loads a page in the first empty frame of the store.
-// The input lines must contain exactly 3 elements.
-// struct Frame* loadInFirstEmptyFrame(char* lines[]){
-// 	for(int i = 0; i < FRAME_STORE_SIZE / FRAME_SIZE; i++){
-// 		if(frameStore[i]->isEmpty){
-// 			frameStore[i]->loadFrame(frameStore[i], lines);
-// 			return frameStore[i];
-// 		}
-// 	}
-// 	return NULL;
-// }
-
-// Get a certain line from a certain frame.s
-// char* getFrameLine(int frame, int line){
-// 	if(line >= 3 || line < 0 || frame < 0 || frame >= FRAME_STORE_SIZE / FRAME_SIZE) return NULL;
-// 	return frameStore[frame]->lines[line];
-// }
-
-// // Delete a certain frame.
-// void deleteFrame(int frame){
-// 	if(frame < 0 || frame >= FRAME_STORE_SIZE / FRAME_SIZE) return;
-// 	frameStore[frame]->clearFrame(frameStore[frame]);
-// }

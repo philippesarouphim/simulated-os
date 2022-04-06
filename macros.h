@@ -9,3 +9,5 @@
 #define FRAME_SIZE 3
 
 #define MAX_PAGES 100
+
+#define PAGE_NOT_FOUND "err: page not found"

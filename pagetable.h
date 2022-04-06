@@ -9,3 +9,5 @@ struct PageTable{
     void (*clearAllPages) (struct PageTable*);
     char* (*getLineFromPage) (struct PageTable*, int page, int line);
 };
+
+struct PageTable* create_PageTable();

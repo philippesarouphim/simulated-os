@@ -38,13 +38,15 @@ void clearPage(struct Page* this, int fromLRUCache){
 }
 
 char* getLine(struct Page* this, int line){
-    if(line >= 0 && line < 3) return this->frame->lines[line];
-    return NULL;
+    if(line < 0 || line >= 3) return NULL;
+    cache->usePage(cache, this->pageInLRUCache);
+    return this->frame->lines[line];
 }
 
 void create_Page(struct PageTable* this, int i, char* lines[]){
     struct Page* page = malloc(sizeof(struct Page));
     page->frame = cache->findFirstEmptyFrameOrReplace(cache);
+    page->frame->loadFrame(page->frame, lines);
     page->pageInLRUCache = cache->addPage(cache, page);
     page->pageInTable = this->addPage(this, page, i);
     page->clearPage = clearPage;
@@ -70,7 +72,7 @@ struct Frame* findFirstEmptyFrameOrReplace(struct LRUCache* this){
 }
 
 char* getLineFromPage(struct PageTable* this, int page, int line){
-    if(!this->pages[page]) return NULL;
+    if(!this->pages[page]) return PAGE_NOT_FOUND;
     return this->pages[page]->getLine(this->pages[page], line);
 }
 
@@ -109,30 +111,28 @@ struct LRUCacheNode* addPage(struct LRUCache* this, struct Page* page){
 void usePage(struct LRUCache* this, struct LRUCacheNode* node){
     if(this->tail == node) return;
     if(this->head == node){
-        this->head = node->previous;
-        this->head->next = NULL;
-        node->previous = NULL;
-        node->next = this->head;
-        this->head->previous = node;
-        this->head = node;
+        this->head->next->previous = NULL;
+        this->head = this->head->next;
     } else {
         node->previous->next = node->next;
         node->next->previous = node->previous;
-        node->previous = NULL;
-        this->head->previous = node;
-        node->next = this->head;
-        this->head = node;
     }
+    node->next = NULL;
+    this->tail->next = node;
+    node->previous = this->tail;
+    this->tail = this->tail->next;
 }
 
 struct Frame* clearLRU(struct LRUCache* this){
     if(!this->head) return NULL;
     struct Frame* frame = this->head->page->frame;
+    frame->alertVictim(frame);
     this->head->page->clearPage(this->head->page, 1);
     free(this->head->page);
     if(this->head->next) this->head->next->previous = NULL;
+    struct LRUCacheNode* head = this->head;
     this->head = this->head->next;
-    free(this->head);
+    free(head);
     return frame;
 }
 
@@ -140,12 +140,12 @@ void clearNode(struct LRUCache* this, struct LRUCacheNode* node){
     if(node->next){
         node->next->previous = node->previous;
     } else {
-        this->head = this->head->previous;
+        this->tail = this->tail->previous;
     }
     if(node->previous){
         node->previous->next = node->next;
     } else {
-        this->tail = this->tail->next;
+        this->head = this->head->next;
     }
     free(node);
 }

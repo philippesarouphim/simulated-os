@@ -5,6 +5,9 @@
 #include "interpreter.h"
 #include "shellmemory.h"
 #include "shell.h"
+#include "pagetable.h"
+
+#include "macros.h"
 
 int generate_pid();
 struct pcb* create_pcb(int i, char* code_file);
@@ -20,7 +23,7 @@ struct pcb{
     char* code_file_name;
     FILE* code_file;
     int pageCounter;
-    int pageTable[100];
+    struct PageTable* pageTable;
     int endReached;
 
     int (*load_next_page_into_memory) (struct pcb* this);
@@ -34,25 +37,20 @@ struct pcb{
 
 // This method cleares the process' code from memory.
 void free_memory(struct pcb* this){
-    // Iterate through every single line and reset the memory used.
-    for(int i = 0; i < 100; i++){
-        if(this->pageTable[i] != -1) deleteFrame(this->pageTable[i]);
-    }
+    this->pageTable->clearAllPages(this->pageTable);
 }
 
 // This method executes a single line of code from the process.
 // Returns -1 in case of a page fault, 0 if end of code is reached, 1 otherwise.
 int execute_next(struct pcb* this){
     // Fetch current line of code.
-    int page = this->pageTable[this->counter / 3];
+    char* instruction = this->pageTable->getLineFromPage(this->pageTable, this->counter / 3, this->counter % 3);
 
     // Check for page fault
-    if(page == -1){
+    if(instruction && strcmp(instruction, PAGE_NOT_FOUND) == 0){
         this->load_next_page_into_memory(this);
         return -1;
     }
-
-    char* instruction = getFrameLine(page, this->counter % 3);
 
     // Check if end of code
     if(instruction == NULL && this->endReached) {
@@ -107,7 +105,8 @@ int load_page_into_memory(struct pcb* this, int page){
         lines[i] = malloc(sizeof(char) * 100);
         fgets(lines[i], 100, this->code_file);
     }
-    this->pageTable[page] = loadInFirstEmptyFrame(lines);
+    eof = feof(this->code_file);
+    this->pageTable->createPage(this->pageTable, this->pageCounter, lines);
     if(eof) this->endReached = 1;
     return -eof + 1;
 }
@@ -146,7 +145,7 @@ struct pcb* create_pcb(int i, char* code_file){
     sprintf(block->code_file_name, "./backingStore/prog%d", i);
     block->pageCounter = 0;
     block->endReached = 0; 
-    for(int i = 0; i < 100; i++) block->pageTable[i] = -1;
+    block->pageTable = create_PageTable();
 
     block->load_next_page_into_memory = load_next_page_into_memory;
     block->load_all_pages_into_memory = load_all_pages_into_memory;
