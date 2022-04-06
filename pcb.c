@@ -53,7 +53,7 @@ int execute_next(struct pcb* this){
     }
 
     // Check if end of code
-    if(instruction == NULL && this->endReached) {
+    if((instruction == NULL || (this->counter % 3 == 2 && this->counter / 3 == this->pageCounter -1)) && this->endReached) {
         free_memory(this);
         return 0;   
     }
@@ -108,15 +108,14 @@ int load_page_into_memory(struct pcb* this, int page){
     eof = feof(this->code_file);
     this->pageTable->createPage(this->pageTable, this->pageCounter, lines);
     if(eof) this->endReached = 1;
+    this->pageCounter++;
     return -eof + 1;
 }
 
 // This method loads the next page into the frame store.
 // If the end of file is reached it returns 1, otherwise 0.
 int load_next_page_into_memory(struct pcb* this){
-    int code= load_page_into_memory(this, this->pageCounter);
-    this->pageCounter++;
-    return code;
+    return load_page_into_memory(this, this->pageCounter);
 }
 
 void load_next_n_pages_into_memory(struct pcb* this, int n){
