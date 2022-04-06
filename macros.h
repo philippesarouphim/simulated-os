@@ -7,3 +7,5 @@
 #endif
 
 #define FRAME_SIZE 3
+
+#define MAX_PAGES 100
