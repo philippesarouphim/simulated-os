@@ -37,7 +37,7 @@ struct pcb{
 
 // This method cleares the process' code from memory.
 void free_memory(struct pcb* this){
-    this->pageTable->clearAllPages(this->pageTable);
+    // this->pageTable->clearAllPages(this->pageTable);
 }
 
 // This method executes a single line of code from the process.
