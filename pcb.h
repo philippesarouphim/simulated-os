@@ -9,6 +9,7 @@ struct pcb{
     struct PageTable* pageTable;
     int endReached;
 
+    int (*load_page_into_memory)(struct pcb* this, int page);
     int (*load_next_page_into_memory) (struct pcb* this);
     void (*load_all_pages_into_memory) (struct pcb* this);
     void (*load_next_n_pages_into_memory) (struct pcb* this, int n);

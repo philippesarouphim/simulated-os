@@ -128,7 +128,8 @@ void aging(struct Queue* this){
     }
 }
 
-// This method performs the initial loading of pages into memory.
+// This method performs the initial loading of pages into the framestore.
+// It loads the first two pages of code only.
 void load_pages(struct Queue* this){
     struct QueueNode* curr = this->head;
     while(curr != NULL){
@@ -137,7 +138,7 @@ void load_pages(struct Queue* this){
     }
 }
 
-// This method creates a queue.
+// This function is a constructor for the Queue struct.
 struct Queue* create_queue(enum Policy policy){
     struct Queue* queue = malloc(sizeof(struct Queue));
     queue->head = NULL;

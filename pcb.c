@@ -9,9 +9,7 @@
 
 #include "macros.h"
 
-char* pid_counter = "pid_counter";
-
-// This method cleares the process' code from memory.
+// This method cleares the process' code from the page table and framestore.
 void free_memory(struct pcb* this){
     // this->pageTable->clearAllPages(this->pageTable);
 }
@@ -49,7 +47,7 @@ int execute_next_n(struct pcb* this, int num){
     // Execute determined number of lines of code.
     for(int i = 0; i < num; i++){
         // Check whether end is reached, in which case return 0.
-        int code = execute_next(this);
+        int code = this->execute_next(this);
         if(code != 1){
             return code;
         }
@@ -62,7 +60,7 @@ int execute_next_n(struct pcb* this, int num){
 // This method executes all lines of code in the process.
 // On finish, it cleares the process' code from memory.
 void execute_until_end(struct pcb* this){
-    while(execute_next(this));
+    while(this->execute_next(this));
 }
 
 // This method of PCB loads a specified page into the frame store.
@@ -91,9 +89,10 @@ int load_page_into_memory(struct pcb* this, int page){
 // This method loads the next page into the frame store.
 // If the end of file is reached it returns 1, otherwise 0.
 int load_next_page_into_memory(struct pcb* this){
-    return load_page_into_memory(this, this->pageCounter);
+    return this->load_page_into_memory(this, this->pageCounter);
 }
 
+// This method of pcb loads the next n pages into the framestore.
 void load_next_n_pages_into_memory(struct pcb* this, int n){
     for(int i = 0; i < n; i++){
         int code = this->load_next_page_into_memory(this);
@@ -101,9 +100,9 @@ void load_next_n_pages_into_memory(struct pcb* this, int n){
     }
 }
 
-// This method loads all remainaing pages into the frame store.
+// This method of pcb loads all remainaing pages into the frame store.
 void load_all_pages_into_memory(struct pcb* this){
-    while(load_next_page_into_memory(this));
+    while(this->load_next_page_into_memory(this));
 }
 
 // This method loads code into the backing store.
@@ -113,15 +112,15 @@ void load_code_into_backingstore(char* code_file, char* backing_location){
     system(loadInBackingStoreCommmand);
 }
 
-// This method generates a new unique PID.
+// This function generates a new unique PID.
 int generate_pid(){
     // Get counter from memory
-    char* current_pid = mem_get_value(pid_counter);
+    char* current_pid = mem_get_value(PID_COUNTER);
 
     // If counter does not exist, create it, set its value to 0, and return id 0.
-    if(strcmp(pid_counter, "Variable does not exist") == 0){
+    if(strcmp(PID_COUNTER, "Variable does not exist") == 0){
         current_pid = "0";
-        mem_set_value(pid_counter, current_pid);
+        mem_set_value(PID_COUNTER, current_pid);
         return 0;
     }
 
@@ -129,7 +128,7 @@ int generate_pid(){
     int new_pid = atoi(current_pid) + 1;
     char* new_pid_s = malloc(8 * sizeof(char));
     sprintf(new_pid_s, "%d", new_pid);
-    mem_set_value(pid_counter, new_pid_s);
+    mem_set_value(PID_COUNTER, new_pid_s);
     return new_pid;
 }
 
@@ -149,6 +148,7 @@ struct pcb* create_pcb(int i, char* code_file){
     block->endReached = 0; 
     block->pageTable = create_PageTable();
 
+    block->load_page_into_memory = load_page_into_memory;
     block->load_next_page_into_memory = load_next_page_into_memory;
     block->load_all_pages_into_memory = load_all_pages_into_memory;
     block->load_next_n_pages_into_memory = load_next_n_pages_into_memory;

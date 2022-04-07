@@ -11,3 +11,5 @@
 #define MAX_PAGES 100
 
 #define PAGE_NOT_FOUND "err: page not found"
+
+#define PID_COUNTER "pid_counter"
