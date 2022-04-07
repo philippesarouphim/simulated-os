@@ -1,9 +1,12 @@
 ## Philippe Sarouphim Hochar #260885492
 ---------------------------------------
+# Assignment 3
+
+The code is based on my own code from Assignment 2. My code from Assignment 2 is based on my own code from assignment 1. My code from assignment 1 is based on the provided starter code.
 
 # Assignment 2
 
-The code is based on my own code form Assignment 1.
+The code is based on my own code from Assignment 1.
 
 My code form assignment 1 is based on the starter code for assignment 1.
 
