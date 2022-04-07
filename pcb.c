@@ -71,18 +71,29 @@ int load_page_into_memory(struct pcb* this, int page){
     int eof = 0;
     char* lines[3];
     for(int i = 0; i < 3; i++){
+        // Check if eof is reached, in which case fill the rest of the pointers with NULL.
         eof = feof(this->code_file);
         if(eof) {
             lines[i] = NULL;
             continue;
         }
+
+        // Get the line from the file
         lines[i] = malloc(sizeof(char) * 100);
         fgets(lines[i], 100, this->code_file);
     }
-    eof = feof(this->code_file);
+
+    // Create the new page in the frame store with the fetched lines
     this->pageTable->createPage(this->pageTable, this->pageCounter, lines);
+
+    // Check again if eof is reached, and set the endReached flag accordingly.
+    eof = feof(this->code_file);
     if(eof) this->endReached = 1;
+
+    // Increment page counter
     this->pageCounter++;
+
+    // Return whether eof is reached
     return -eof + 1;
 }
 
@@ -107,8 +118,11 @@ void load_all_pages_into_memory(struct pcb* this){
 
 // This method loads code into the backing store.
 void load_code_into_backingstore(char* code_file, char* backing_location){
+    // Write cp command to load into backing store
     char* loadInBackingStoreCommmand = malloc(sizeof(char) * (4 + strlen(code_file) + strlen(backing_location)));
     sprintf(loadInBackingStoreCommmand, "cp %s %s", code_file, backing_location);
+
+    // Execute command
     system(loadInBackingStoreCommmand);
 }
 
