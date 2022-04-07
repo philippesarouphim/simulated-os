@@ -2,9 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "pcb.c"
-
-enum Policy { FCFS, SJF, RR, AGING, INVALID };
+#include "queue.h"
 
 // Convert from string to Policy enum.
 // If the string corresponds to no enum, INVALID is returned.
@@ -15,14 +13,6 @@ enum Policy string_to_policy(char* string){
     if(strcmp(string, "AGING") == 0) return AGING;
     return INVALID;
 }
-
-struct Queue{
-    struct QueueNode* head;
-    void (*enqueue) (struct Queue* this, struct pcb* block);
-    struct pcb* (*dequeue) (struct Queue* this);
-    void (*execute) (struct Queue* this);
-    void (*load_pages) (struct Queue* this);
-};
 
 struct QueueNode{
     struct pcb* block;

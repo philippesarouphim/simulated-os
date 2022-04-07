@@ -1,10 +1,11 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h> 
 
+#include "shell.h"
 #include "interpreter.h"
 #include "shellmemory.h"
+#include "framestore.h"
 #include "pagetable.h"
 
 #include "macros.h"

@@ -2,38 +2,14 @@
 #include <stdlib.h>
 #include <string.h> 
 
-#include "interpreter.h"
-#include "shellmemory.h"
-#include "shell.h"
+#include "pcb.h"
 #include "pagetable.h"
+#include "shell.h"
+#include "shellmemory.h"
 
 #include "macros.h"
 
-int generate_pid();
-struct pcb* create_pcb(int i, char* code_file);
-void load_code_into_backingstore(char* code_file, char* backing_location);
-
 char* pid_counter = "pid_counter";
-
-struct pcb{
-    int pid;
-    int score;
-    int counter;
-
-    char* code_file_name;
-    FILE* code_file;
-    int pageCounter;
-    struct PageTable* pageTable;
-    int endReached;
-
-    int (*load_next_page_into_memory) (struct pcb* this);
-    void (*load_all_pages_into_memory) (struct pcb* this);
-    void (*load_next_n_pages_into_memory) (struct pcb* this, int n);
-    int (*execute_next) (struct pcb* this);
-    int (*execute_next_n) (struct pcb* this, int num);
-    void (*execute_until_end) (struct pcb* this);
-    void (*free_memory) (struct pcb* this);
-};
 
 // This method cleares the process' code from memory.
 void free_memory(struct pcb* this){
@@ -130,6 +106,33 @@ void load_all_pages_into_memory(struct pcb* this){
     while(load_next_page_into_memory(this));
 }
 
+// This method loads code into the backing store.
+void load_code_into_backingstore(char* code_file, char* backing_location){
+    char* loadInBackingStoreCommmand = malloc(sizeof(char) * (4 + strlen(code_file) + strlen(backing_location)));
+    sprintf(loadInBackingStoreCommmand, "cp %s %s", code_file, backing_location);
+    system(loadInBackingStoreCommmand);
+}
+
+// This method generates a new unique PID.
+int generate_pid(){
+    // Get counter from memory
+    char* current_pid = mem_get_value(pid_counter);
+
+    // If counter does not exist, create it, set its value to 0, and return id 0.
+    if(strcmp(pid_counter, "Variable does not exist") == 0){
+        current_pid = "0";
+        mem_set_value(pid_counter, current_pid);
+        return 0;
+    }
+
+    // Generate new PID by incrementing current one by 1, save, and return
+    int new_pid = atoi(current_pid) + 1;
+    char* new_pid_s = malloc(8 * sizeof(char));
+    sprintf(new_pid_s, "%d", new_pid);
+    mem_set_value(pid_counter, new_pid_s);
+    return new_pid;
+}
+
 // This is a constructor for the PCB struct.
 // It generates the PCB with all default values, a unique PID, then loads the input code in memory.
 // If ran out of memory while loading code, returns null.
@@ -159,31 +162,4 @@ struct pcb* create_pcb(int i, char* code_file){
     block->code_file = fopen(block->code_file_name, "r");
 
     return block;
-}
-
-// This method loads code into the backing store.
-void load_code_into_backingstore(char* code_file, char* backing_location){
-    char* loadInBackingStoreCommmand = malloc(sizeof(char) * (4 + strlen(code_file) + strlen(backing_location)));
-    sprintf(loadInBackingStoreCommmand, "cp %s %s", code_file, backing_location);
-    system(loadInBackingStoreCommmand);
-}
-
-// This method generates a new unique PID.
-int generate_pid(){
-    // Get counter from memory
-    char* current_pid = mem_get_value(pid_counter);
-
-    // If counter does not exist, create it, set its value to 0, and return id 0.
-    if(strcmp(pid_counter, "Variable does not exist") == 0){
-        current_pid = "0";
-        mem_set_value(pid_counter, current_pid);
-        return 0;
-    }
-
-    // Generate new PID by incrementing current one by 1, save, and return
-    int new_pid = atoi(current_pid) + 1;
-    char* new_pid_s = malloc(8 * sizeof(char));
-    sprintf(new_pid_s, "%d", new_pid);
-    mem_set_value(pid_counter, new_pid_s);
-    return new_pid;
 }

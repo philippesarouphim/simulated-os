@@ -2,10 +2,9 @@
 #include <stdlib.h>
 #include <string.h> 
 
+#include "queue.h"
+#include "interpreter.h"
 #include "shellmemory.h"
-#include "shell.h"
-//#include "pcb.c"
-#include "queue.c"
 
 int MAX_ARGS_SIZE = 7;
 
