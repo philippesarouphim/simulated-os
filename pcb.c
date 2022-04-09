@@ -10,7 +10,9 @@
 #include "macros.h"
 
 // This method cleares the process' code from the page table and framestore.
+// It also closes the filestream to the code file.
 void free_memory(struct pcb* this){
+    fclose(this->code_file);
     // this->pageTable->clearAllPages(this->pageTable);
 }
 

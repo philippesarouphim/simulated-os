@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
 	frameStore_init();
 	LRUCache_init();
 
-	system("test -d backingStore && rm -r ./backingStore");
+	system("test -d backingStore && rm -r backingStore");
 	system("mkdir backingStore");
 
 	printf("Frame Store Size = %d; Variable Store Size = %d\n\n", FRAME_STORE_SIZE, VARIABLE_STORE_SIZE);
