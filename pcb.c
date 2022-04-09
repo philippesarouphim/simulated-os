@@ -27,13 +27,18 @@ int execute_next(struct pcb* this){
     }
 
     // Check if end of code
-    if((instruction == NULL || (this->counter % 3 == 2 && this->counter / 3 == this->pageCounter -1)) && this->endReached) {
+    if(!instruction && this->endReached) {
         free_memory(this);
         return 0;   
     }
 
     // Execute line of code.
     parseInput(instruction);
+
+    if(this->counter % 3 == 2 && this->counter / 3 == this->pageCounter -1 && this->endReached){
+        free_memory(this);
+        return 0;   
+    }
 
     // Increment PCB counter.
     this->counter++;
