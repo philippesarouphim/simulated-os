@@ -1,2 +1,4 @@
-int interpreter(char* command_args[], int args_size);
+#include "shell.h"
+
+int interpreter(struct UserInput* input);
 int help();

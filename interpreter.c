@@ -21,86 +21,88 @@ int exec_conc();
 int badcommandFileDoesNotExist();
 
 // Interpret commands and their arguments
-int interpreter(char* command_args[], int args_size){
-	int i;
+int interpreter(struct UserInput* input){
+	printf("Number of words: %d\n", input->size);
+	for(int i = 0; i < input->size; i++) printf("Word #%d: %s\n", i, input->words[i]);
+	// int i;
 
-	if ( args_size < 1 ){
-		return badcommand();
-	} else if(args_size > MAX_ARGS_SIZE){
-		return printError("Too many tokens.\r\n");
-	}
+	// if ( args_size < 1 ){
+	// 	return badcommand();
+	// } else if(args_size > MAX_ARGS_SIZE){
+	// 	return printError("Too many tokens.\r\n");
+	// }
 
 
-	for ( i=0; i<args_size; i++){ //strip spaces new line etc
-		command_args[i][strcspn(command_args[i], "\r\n")] = 0;
-	}
+	// for ( i=0; i<args_size; i++){ //strip spaces new line etc
+	// 	command_args[i][strcspn(command_args[i], "\r\n")] = 0;
+	// }
 
-	if (strcmp(command_args[0], "help")==0){
-	    //help
-	    if (args_size != 1) return badcommand();
-	    return help();
+	// if (strcmp(command_args[0], "help")==0){
+	//     //help
+	//     if (args_size != 1) return badcommand();
+	//     return help();
 	
-	} else if (strcmp(command_args[0], "quit")==0) {
-		//quit
-		if (args_size != 1) return badcommand();
-		return quit();
+	// } else if (strcmp(command_args[0], "quit")==0) {
+	// 	//quit
+	// 	if (args_size != 1) return badcommand();
+	// 	return quit();
 
-	} else if (strcmp(command_args[0], "set")==0) {
-		// set
+	// } else if (strcmp(command_args[0], "set")==0) {
+	// 	// set
 
-		// Check if we have between 3 to 7 arguments
-		if (args_size < 3) return badcommand();
-		if (args_size > 7) return printError("Too many tokens.");
+	// 	// Check if we have between 3 to 7 arguments
+	// 	if (args_size < 3) return badcommand();
+	// 	if (args_size > 7) return printError("Too many tokens.");
 
-		// Extract the words to be set to the variable
-		char *values[args_size - 2];
-		for (int i = 2, j = 0; i < args_size; i++, j++) values[j] = command_args[i];
+	// 	// Extract the words to be set to the variable
+	// 	char *values[args_size - 2];
+	// 	for (int i = 2, j = 0; i < args_size; i++, j++) values[j] = command_args[i];
 
-		// Perform set and return
-		return set(command_args[1], values, args_size - 2);
+	// 	// Perform set and return
+	// 	return set(command_args[1], values, args_size - 2);
 	
-	} else if (strcmp(command_args[0], "print")==0) {
-		if (args_size != 2) return badcommand();
-		return print(command_args[1]);
+	// } else if (strcmp(command_args[0], "print")==0) {
+	// 	if (args_size != 2) return badcommand();
+	// 	return print(command_args[1]);
 	
-	} else if (strcmp(command_args[0], "run")==0) {
-		if (args_size != 2) return badcommand();
-		return run(command_args[1]);
+	// } else if (strcmp(command_args[0], "run")==0) {
+	// 	if (args_size != 2) return badcommand();
+	// 	return run(command_args[1]);
 	
-	} else if(strcmp(command_args[0], "echo") == 0){
-		// echo
+	// } else if(strcmp(command_args[0], "echo") == 0){
+	// 	// echo
 
-		// Check if there are exactly 2 arguments
-		if (args_size != 2) return badcommand();
+	// 	// Check if there are exactly 2 arguments
+	// 	if (args_size != 2) return badcommand();
 
-		// Echo and return
-		return echo(command_args[1]);
+	// 	// Echo and return
+	// 	return echo(command_args[1]);
 
-	} else if(strcmp(command_args[0], "my_ls") == 0){
-		// my_ls
+	// } else if(strcmp(command_args[0], "my_ls") == 0){
+	// 	// my_ls
 
-		// Check if there is only 1 args
-		if (args_size != 1) return badcommand();
+	// 	// Check if there is only 1 args
+	// 	if (args_size != 1) return badcommand();
 
-		// Perform ls and return
-		return my_ls();
+	// 	// Perform ls and return
+	// 	return my_ls();
 
-	} else if(strcmp(command_args[0], "exec") == 0){
-		// exec
+	// } else if(strcmp(command_args[0], "exec") == 0){
+	// 	// exec
 
-		// Check if args between 2 and 5
-		if(args_size < 2 || args_size > 5) return badcommand();
+	// 	// Check if args between 2 and 5
+	// 	if(args_size < 2 || args_size > 5) return badcommand();
 
-		// Make the call for concurrent execution of processes.
-		return exec_conc(command_args, args_size);
+	// 	// Make the call for concurrent execution of processes.
+	// 	return exec_conc(command_args, args_size);
 
-	} else if(strcmp(command_args[0], "resetmem") == 0){
-		// resetmem
+	// } else if(strcmp(command_args[0], "resetmem") == 0){
+	// 	// resetmem
 
-		if(args_size != 1) return badcommand();
-		mem_init();
+	// 	if(args_size != 1) return badcommand();
+	// 	mem_init();
 
-	} else return badcommand();
+	// } else return badcommand();
 }
 
 int help(){

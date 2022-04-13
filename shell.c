@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h> 
 
-#include "shell.h"
 #include "interpreter.h"
 #include "shellmemory.h"
 #include "framestore.h"
@@ -10,8 +9,16 @@
 
 #include "macros.h"
 
-int MAX_USER_INPUT = 1000;
+
+void addWord(struct UserInput* this, char* word);
+char* getCommand(struct UserInput* this);
+char** getArgs(struct UserInput* this);
+int getArgsSize(struct UserInput* this);
+struct UserInput* create_UserInput();
+
 int parseInput(char ui[]);
+
+char worstChar(char first, char second);
 
 // Start of everything
 int main(int argc, char *argv[]) {
@@ -20,11 +27,11 @@ int main(int argc, char *argv[]) {
 	help();
 
 	char prompt = '$';  				// Shell prompt
-	char userInput[MAX_USER_INPUT];		// user's input stored here
+	char userInput[MAX_COMMAND_SIZE];		// user's input stored here
 	int errorCode = 0;					// zero means no error, default
 
 	//init user input
-	for (int i=0; i<MAX_USER_INPUT; i++)
+	for (int i=0; i<MAX_COMMAND_SIZE; i++)
 		userInput[i] = '\0';
 	
 	//init shell memory
@@ -39,7 +46,7 @@ int main(int argc, char *argv[]) {
 
 	while(1) {
 		printf("%c ",prompt);
-		fgets(userInput, MAX_USER_INPUT-1, stdin);
+		fgets(userInput, MAX_COMMAND_SIZE-1, stdin);
 
 		// If end of file is reached (only happens in batch),
 		// then, switch the input from batch to command line.
@@ -56,44 +63,102 @@ int main(int argc, char *argv[]) {
 
 }
 
-// Extract words from the input then call interpreter
+// Parse an input line into multiple UserInput objects.
 int parseInput(char ui[]) {
- 
-	char tmp[200];
-	char *words[10][100];							
-	int a=0,b;							
-	int v=0;
-	int w[10];
+	// Remove last character is it is a line return
+	if(ui[strlen(ui) - 1] == '\n') ui[strlen(ui) - 1] = '\0';
 
-	// Parse all commands
-	while(ui[a] != '\0' && a<1000){
-		w[v] = 0;
+	// Create UserInput dynamic array and add the first input to it
+	struct UserInput** inputs = malloc(sizeof(struct UserInput*));
+	int n = 1;
+	struct UserInput* input = create_UserInput();
+	inputs[0] = input;
 
-		// Skip white spaces
-		for(a = a; ui[a]==' ' && a<1000; a++);
+	// Initialize starting pointer and skip all beginning white spaces.
+	char* start = &ui[0];
+	while (*start == ' ') start += sizeof(char);
+	char* scout = start;
+	while(1){
+		// Stop on encountering special character.
+		if(*scout == '\0' || *scout == ';' || *scout == ' '){
+			char* anchor = scout; // Mark location of first special character.
 
-		// Extracts all words from a single command
-		while(ui[a] != ';' && ui[a] != '\0' && a<1000) {
+			// Continue scouting to discover all consecutive special characters and retrieve the
+			// highest priority one.
+			char worst = *anchor;
+			while(*scout == ';' || *scout == ' '){
+				worst = worstChar(worst, *scout);
+				scout = scout + sizeof(char);
+			}
+			if(*scout == '\0') worst = '\0';
 
-			// Extract a word
-			for(b=0; ui[a]!=';' && ui[a]!='\0' && ui[a]!=' ' && a<1000; a++, b++)
-				tmp[b] = ui[a];
-			tmp[b] = '\0';
+			// Mark end of string at anchor point (first SC) and add word to UI object and update pointer for next iteration.
+			*anchor = '\0';
+			input->addWord(input, start);
+			start = scout;
 
-			words[v][w[v]] = strdup(tmp);
+			// Based on event, wither continue parsing words, stop, or continue in another UI object.
+			if(worst == ' ') continue;
+			if(worst == '\0') break;
 
-			if(ui[a] != ';' && ui[a] != '\0') a++; 
-			w[v]++;
+			// Create new input, expand input array, and add new input
+			input = create_UserInput();
+			inputs = realloc(inputs, sizeof(inputs) + sizeof(struct UserInput*));
+			inputs[n] = input;
+			n++;
 		}
-
-		if(ui[a] != '\0') a++;
-		v++;
+		scout += sizeof(char);
 	}
 
-	// Execute all commands
-	for(int i = 0; i < v; i++){
-		int code = interpreter(words[i], w[i]);
-	}
+	// Parsing done, moving on to interpretation
+	for(int i = 0; i < n; i++) interpreter(inputs[i]);
+	
+}
 
-	return 0;
+// Find highest priority event depending on characters.
+// Priority: '\0' > ';' > ' '.
+char worstChar(char first, char second){
+	if(first == '\0' || second == '\0') return '\0';
+	if(first == ';' || second == ';') return ';';
+	return ' ';
+}
+
+// This is a method of the UserInput to add a word.
+// It resizes the string array and inserts the new word.
+void addWord(struct UserInput* this, char* word){
+	this->words = realloc(this->words, sizeof(this->words) + sizeof(char*));
+	this->words[this->size] = word;
+	this->size++;
+}
+
+// This method of UserInput returns the input command.
+// The input command simply refers to the first word in the input.
+char* getCommand(struct UserInput* this){
+	return this->words[0];
+}
+
+// This method of UserInput returns the passed arguments.
+// The arguments simply refer to all of the words passed in the input except the first.
+char** getArgs(struct UserInput* this){
+	return this->words + sizeof(char) * strlen(this->words[0]);
+}
+
+// This method of UserInput returns the number of args passed in the input.
+// This number is simply the number of input words minus one.
+int getArgsSize(struct UserInput* this){
+	return this->size - 1;
+}
+
+// This method is a constructor for the UserInput struct.
+struct UserInput* create_UserInput(){
+	struct UserInput* input = malloc(sizeof(struct UserInput));
+	input->words = malloc(sizeof(char*));
+	input->size = 0;
+
+	input->addWord = addWord;
+	input->getCommand = getCommand;
+	input-> getArgs = getArgs;
+	input->getArgsSize = getArgsSize;
+
+	return input;
 }
