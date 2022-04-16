@@ -15,3 +15,5 @@
 #define PID_COUNTER "pid_counter"
 
 #define MAX_COMMAND_SIZE 100
+
+#define PROMPT '$'

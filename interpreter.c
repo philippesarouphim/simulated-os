@@ -22,8 +22,9 @@ int badcommandFileDoesNotExist();
 
 // Interpret commands and their arguments
 int interpreter(struct UserInput* input){
-	printf("Number of words: %d\n", input->size);
-	for(int i = 0; i < input->size; i++) printf("Word #%d: %s\n", i, input->words[i]);
+	//printf("Number of words: %d\n", input->size);
+	//for(int i = 0; i < input->size; i++) printf("Word #%d: %s\n", i, input->words[i]);
+	if(strcmp(input->getCommand(input), "help") == 0) help();
 	// int i;
 
 	// if ( args_size < 1 ){
@@ -106,14 +107,15 @@ int interpreter(struct UserInput* input){
 }
 
 int help(){
-
-	char help_string[] = "COMMAND			DESCRIPTION\n \
-help			Displays all the commands\n \
-quit			Exits / terminates the shell with “Bye!”\n \
-set VAR STRING		Assigns a value to shell memory\n \
-print VAR		Displays the STRING assigned to VAR\n \
-run SCRIPT.TXT		Executes the file SCRIPT.TXT\n";
-	printf("%s\n", help_string);
+	char* lines[6];
+	lines[0] = "COMMAND\t\t\tDESCRIPTION";
+	lines[1] = "help\t\t\tDisplay all the commands";
+	lines[2] = "quit\t\t\tExits/terminates the shell";
+	lines[3] = "set VAR STRING\t\tAssigns a value to shell memory";
+	lines[4] = "print VAR\t\tDisplays the string assigned to VAR";
+	lines[5] = "run SCRIPT\t\tExecutes the file SCRIPT";
+	for(int i = 0; i < 6; i++) printf("%s\n", lines[i]);
+	printf("\nType 'help <command>' for more information.\n\n");
 	return 0;
 }
 

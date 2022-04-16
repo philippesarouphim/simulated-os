@@ -23,40 +23,36 @@ char worstChar(char first, char second);
 // Start of everything
 int main(int argc, char *argv[]) {
 
+	// Display shell info
 	printf("%s\n", "Shell version 1.1 Created January 2022");
 	help();
 
-	char prompt = '$';  				// Shell prompt
-	char userInput[MAX_COMMAND_SIZE];		// user's input stored here
-	int errorCode = 0;					// zero means no error, default
-
-	//init user input
-	for (int i=0; i<MAX_COMMAND_SIZE; i++)
-		userInput[i] = '\0';
-	
-	//init shell memory
+	// Initialize all memory components
 	mem_init();
 	frameStore_init();
 	LRUCache_init();
 
+	// Reset backing store in case of unexpected exit
 	system("test -d backingStore && rm -r backingStore");
 	system("mkdir backingStore");
 
+	// Display memory info
 	printf("Frame Store Size = %d; Variable Store Size = %d\n\n", FRAME_STORE_SIZE, VARIABLE_STORE_SIZE);
 
+	// Input loop
 	while(1) {
-		printf("%c ",prompt);
-		fgets(userInput, MAX_COMMAND_SIZE-1, stdin);
+		char* userInput = malloc(sizeof(char) * MAX_COMMAND_SIZE);
+		printf("%c ", PROMPT); // Print prompt
+		fgets(userInput, MAX_COMMAND_SIZE - 1, stdin); // Read input from user
 
 		// If end of file is reached (only happens in batch),
 		// then, switch the input from batch to command line.
 		if(feof(stdin)){
 			freopen("/dev/tty", "r", stdin);
 		}
-
-		errorCode = parseInput(userInput);
-		if (errorCode == -1) exit(99);	// ignore all other errors
-		memset(userInput, 0, sizeof(userInput));
+		
+		// Parse input and send to interpreter, exit if error -1
+		if(parseInput(userInput) == -1) exit(99);
 	}
 
 	return 0;
