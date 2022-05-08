@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 	// Input loop
 	while(1) {
 		char* userInput = malloc(sizeof(char) * MAX_COMMAND_SIZE);
-		printf("%c ", PROMPT); // Print prompt
+		printf("\n%c ", PROMPT); // Print prompt
 		fgets(userInput, MAX_COMMAND_SIZE - 1, stdin); // Read input from user
 
 		// If end of file is reached (only happens in batch),
