@@ -136,7 +136,7 @@ char* getCommand(struct UserInput* this){
 // This method of UserInput returns the passed arguments.
 // The arguments simply refer to all of the words passed in the input except the first.
 char** getArgs(struct UserInput* this){
-	return this->words + sizeof(char) * strlen(this->words[0]);
+	return &(this->words[1]);
 }
 
 // This method of UserInput returns the number of args passed in the input.
