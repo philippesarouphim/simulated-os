@@ -122,7 +122,7 @@ char worstChar(char first, char second){
 // This is a method of the UserInput to add a word.
 // It resizes the string array and inserts the new word.
 void addWord(struct UserInput* this, char* word){
-	this->words = realloc(this->words, sizeof(this->words) + sizeof(char*));
+	this->words = realloc(this->words, (this->size + 1) * sizeof(char*));
 	this->words[this->size] = word;
 	this->size++;
 }
@@ -148,7 +148,7 @@ int getArgsSize(struct UserInput* this){
 // This method is a constructor for the UserInput struct.
 struct UserInput* create_UserInput(){
 	struct UserInput* input = malloc(sizeof(struct UserInput));
-	input->words = malloc(sizeof(char*));
+	input->words = NULL;
 	input->size = 0;
 
 	input->addWord = addWord;
