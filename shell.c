@@ -9,6 +9,7 @@
 
 #include "macros.h"
 
+void init();
 
 void addWord(struct UserInput* this, char* word);
 char* getCommand(struct UserInput* this);
@@ -23,18 +24,12 @@ char worstChar(char first, char second);
 // Start of everything
 int main(int argc, char *argv[]) {
 
+	// Perform necessary initializations before starting the shell
+	init();
+
 	// Display shell info
 	printf("%s\n", "Shell version 1.1 Created January 2022");
 	help();
-
-	// Initialize all memory components
-	mem_init();
-	frameStore_init();
-	LRUCache_init();
-
-	// Reset backing store in case of unexpected exit
-	system("test -d backingStore && rm -r backingStore");
-	system("mkdir backingStore");
 
 	// Display memory info
 	printf("Frame Store Size = %d; Variable Store Size = %d\n\n", FRAME_STORE_SIZE, VARIABLE_STORE_SIZE);
@@ -57,6 +52,18 @@ int main(int argc, char *argv[]) {
 
 	return 0;
 
+}
+
+// Perform necessary initializations
+void init(){
+	// Initialize all memory components
+	mem_init();
+	frameStore_init();
+	LRUCache_init();
+
+	// Reset backing store in case of unexpected exit
+	system("test -d backingStore && rm -r backingStore");
+	system("mkdir backingStore");
 }
 
 // Parse an input line into multiple UserInput objects.
