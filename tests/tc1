@@ -1,0 +1,1 @@
+exec ./tests/progs/prog1 ./tests/progs/prog2 ./tests/progs/prog3 RR
